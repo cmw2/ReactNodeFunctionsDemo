@@ -1,0 +1,4 @@
+set RG=ReactNodeFunctionsDemo-rg
+az group create -n %RG% -l CentralUS
+az sql server create -g %RG% -n cmwnodesqlsvr -u chwestbradmin -p the-long-one
+az sql db create -g %RG% --server cmwnodesqlsvr -n DevDB --service-objective BC_Gen5_2
