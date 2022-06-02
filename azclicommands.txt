@@ -2,3 +2,11 @@ set RG=ReactNodeFunctionsDemo-rg
 az group create -n %RG% -l CentralUS
 az sql server create -g %RG% -n cmwnodesqlsvr -u chwestbradmin -p the-long-one
 az sql db create -g %RG% --server cmwnodesqlsvr -n DevDB --service-objective BC_Gen5_2
+az storage account create -n ordersfuncstor -g ReactNodeFunctionsDemo-rg --sku Standard_LRS
+
+# also created LAW and APPINS but did in portal
+
+az functionapp create -g ReactNodeFunctionsDemo-rg --consumption-plan-location centralus --runtime node --runtime-version 16 --functions-version 4 --name cmwms-orders --storage-account ordersfuncstor
+   # then manually change the App Ins reference and deleted the auto created one
+
+func azure functionapp publish cmwms-orders
