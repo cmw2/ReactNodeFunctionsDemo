@@ -8,7 +8,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import withAITracking from './AppInsights';
-import Orders from './pages/Orders';
+import TodoList from './pages/TodoList';
 
 class App extends React.Component {
   render() {
@@ -23,7 +23,7 @@ class App extends React.Component {
               <Route path="/" element={ <Home/> } />
               <Route path="about" element={ <About/> } />
               <Route path="contact" element={ <Contact/> } />
-              <Route path="orders" element={ <Orders/> } />
+              <Route path="todo" element={ <TodoList/> } />
             </Routes>
           </main>
         </div>
