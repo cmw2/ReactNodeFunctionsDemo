@@ -4,11 +4,11 @@ import './App.css';
 import { BrowserRouter } from "react-router-dom";
 import { Routes, Route } from "react-router-dom"
 import Menu from './Menu';
-import Home from './Home';
-import About from './About';
-import Contact from './Contact';
+import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import withAITracking from './AppInsights';
-import Orders from './Orders';
+import Orders from './pages/Orders';
 
 class App extends React.Component {
   render() {
