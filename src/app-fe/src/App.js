@@ -8,6 +8,7 @@ import Home from './Home';
 import About from './About';
 import Contact from './Contact';
 import withAITracking from './AppInsights';
+import Orders from './Orders';
 
 class App extends React.Component {
   render() {
@@ -22,6 +23,7 @@ class App extends React.Component {
               <Route path="/" element={ <Home/> } />
               <Route path="about" element={ <About/> } />
               <Route path="contact" element={ <Contact/> } />
+              <Route path="orders" element={ <Orders/> } />
             </Routes>
           </main>
         </div>

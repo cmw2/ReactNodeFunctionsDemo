@@ -11,6 +11,9 @@ const items = [{
 }, {
     path: '/contact',
     text: 'Contact'
+}, {
+    path: '/orders',
+    text: 'Orders'
 }];
 
 export default function Menu() {
