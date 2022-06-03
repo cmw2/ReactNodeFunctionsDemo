@@ -1,5 +1,9 @@
 let appInsights = require("applicationinsights");
-appInsights.setup().start();
+appInsights.setup();
+appInsights.defaultClient.setAutoPopulateAzureProperties(true);
+appInsights.start();
+var aiClient = appInsights.defaultClient;
+const axios = require("axios");
 var Connection = require("tedious").Connection;
 var Request = require('tedious').Request;
 var TYPES = require('tedious').TYPES;
@@ -7,6 +11,7 @@ const { url } = require('url');
 
 const executeSQL = (context, verb, payload) => new Promise((resolve, reject) => {
     var result = "";
+    var startTime;
     const paramPayload = (payload != null) ? JSON.stringify(payload) : '';
     //context.log(`Payload: ${JSON.stringify(payload)}`);
 
@@ -27,9 +32,14 @@ const executeSQL = (context, verb, payload) => new Promise((resolve, reject) => 
 
     const request = new Request(`web.${verb}_todo`, (err) => {
         if (err) {
+            var elapsed = new Date() - startTime.getTime();
+            aiClient.trackDependency({time:startTime, target:process.env["db_server"], name:verb, data:`web.${verb}_todo`, duration:elapsed, resultCode:-1, success: false, dependencyTypeName: "AZSQL"});
+            aiClient.trackException({exception: err});
             reject(err);
         } else {
             if ((result == "" || result == null || result == "null")) result = "[]";
+            var elapsed = new Date() - startTime.getTime();
+            aiClient.trackDependency({time:startTime, target:process.env["db_server"], name:verb, data:`web.${verb}_todo`, duration:elapsed, resultCode:0, success: true, dependencyTypeName: "AZSQL"});
             resolve(result);
         }
     });
@@ -43,19 +53,25 @@ const executeSQL = (context, verb, payload) => new Promise((resolve, reject) => 
     });
     
     connection.on('connect', err => {
-        if (err) {
+        if (err) {            
+            var elapsed = new Date() - startTime.getTime();
+            aiClient.trackDependency({time:startTime, target:process.env["db_server"], name:verb, data:"connect", duration:elapsed, resultCode:-1, success: false, dependencyTypeName: "AZSQL"});
+            aiClient.trackException({exception: err});
             reject(err);
         } else {
             connection.callProcedure(request);
         }
     });
 
-    connection.connect();
+    startTime = new Date();
+    connection.connect();        
+    
 });
 
 const httpTrigger = async function (context, req) {
     const method = req.method.toLowerCase();
     var payload = null;
+    const response = await axios.get("https://cmwazfntestwebsite.azurewebsites.net/search/cheese");
 
     enrichToDo = function (source)
     {
@@ -115,7 +131,7 @@ const httpTrigger = async function (context, req) {
 module.exports = async function contextPropagatingHttpTrigger(context, req) {
     // Start an AI Correlation Context using the provided Function context
     const correlationContext = appInsights.startOperation(context, req);
-
+    
     // Wrap the Function runtime with correlationContext
     return appInsights.wrapWithCorrelationContext(async () => {
         //const startTime = Date.now(); // Start trackRequest timer
@@ -124,6 +140,8 @@ module.exports = async function contextPropagatingHttpTrigger(context, req) {
         const result = await httpTrigger(context, req);
 
         // Track Request on completion
+        aiClient.trackEvent({name: "my custom event", properties: {customProperty: "custom property value"}});
+
         // appInsights.defaultClient.trackRequest({
         //     name: context.req.method + " " + context.req.url,
         //     resultCode: context.res.status,
@@ -133,7 +151,7 @@ module.exports = async function contextPropagatingHttpTrigger(context, req) {
         //     duration: Date.now() - startTime,
         //     id: correlationContext.operation.parentId,
         // });
-        appInsights.defaultClient.flush();
+        //appInsights.defaultClient.flush();
 
         return result;
     }, correlationContext)();
