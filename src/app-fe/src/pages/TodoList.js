@@ -11,8 +11,10 @@ class TodoList extends React.Component {
       isLoaded: false,
     }
   }
+    
 
   componentDidMount() {
+    document.title = 'React - Todos';
     getAllTodos().then(res => {
       console.log(res);
       this.setState ({

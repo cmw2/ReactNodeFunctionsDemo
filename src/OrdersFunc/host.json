@@ -2,6 +2,9 @@
   "version": "2.0",
   "logging": {
     "applicationInsights": {
+      "dependencyTrackingOptions": {
+        "enableSqlCommandTextInstrumentation": true
+      },
       "samplingSettings": {
         "isEnabled": true,
         "excludedTypes": "Request"

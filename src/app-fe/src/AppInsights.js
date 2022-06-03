@@ -4,17 +4,22 @@ import { ReactPlugin, withAITracking } from '@microsoft/applicationinsights-reac
 import { createBrowserHistory } from "history";
 
 const browserHistory = createBrowserHistory({ basename: '' });
-var reactPlugin = new ReactPlugin();
+var rp = new ReactPlugin();
 var ai = new ApplicationInsights({
     config: {
         connectionString: 'InstrumentationKey=e91a1564-c9b2-4860-80ac-948b51e08c12;IngestionEndpoint=https://centralus-2.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/',
-        extensions: [reactPlugin],
+        enableAutoRouteTracking: true,
+        enableCorsCorrelation: true,
+        enableRequestHeaderTracking: true,
+        enableResponseHeaderTracking: true,
+        extensions: [rp],
         extensionConfig: {
-          [reactPlugin.identifier]: { history: browserHistory }
+          [rp.identifier]: { history: browserHistory }
         }
     }
 });
 ai.loadAppInsights();
 
-export default (Component) => withAITracking(reactPlugin, Component);
+export default (Component) => withAITracking(rp, Component);
 export const appInsights = ai.appInsights;
+export const reactPlugin = rp;
