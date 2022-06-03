@@ -10,3 +10,5 @@ az functionapp create -g ReactNodeFunctionsDemo-rg --consumption-plan-location c
    # then manually change the App Ins reference and deleted the auto created one
 
 func azure functionapp publish cmwms-orders
+
+az apim create --name cmwms-todo-apim -g ReactNodeFunctionsDemo-rg -l centralus --sku-name Consumption --enable-client-certificate --publisher-email chwestbr@microsoft.com --publisher-name CMW-MS

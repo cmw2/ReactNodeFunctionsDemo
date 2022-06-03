@@ -1,3 +1,5 @@
+let appInsights = require("applicationinsights");
+appInsights.setup().start();
 var Connection = require("tedious").Connection;
 var Request = require('tedious').Request;
 var TYPES = require('tedious').TYPES;
@@ -51,7 +53,7 @@ const executeSQL = (context, verb, payload) => new Promise((resolve, reject) => 
     connection.connect();
 });
 
-todoREST = function (context, req) {
+const httpTrigger = async function (context, req) {
     const method = req.method.toLowerCase();
     var payload = null;
 
@@ -97,7 +99,7 @@ todoREST = function (context, req) {
             break;
     }
 
-    executeSQL(context, prefix, payload)
+    await executeSQL(context, prefix, payload)
         .then(ok => {
             todo = enrichToDo(ok);
             setContext(todo);
@@ -108,7 +110,34 @@ todoREST = function (context, req) {
         });
 }
 
-module.exports = todoREST;
+//module.exports = todoREST;
+
+module.exports = async function contextPropagatingHttpTrigger(context, req) {
+    // Start an AI Correlation Context using the provided Function context
+    const correlationContext = appInsights.startOperation(context, req);
+
+    // Wrap the Function runtime with correlationContext
+    return appInsights.wrapWithCorrelationContext(async () => {
+        //const startTime = Date.now(); // Start trackRequest timer
+
+        // Run the Function
+        const result = await httpTrigger(context, req);
+
+        // Track Request on completion
+        // appInsights.defaultClient.trackRequest({
+        //     name: context.req.method + " " + context.req.url,
+        //     resultCode: context.res.status,
+        //     success: true,
+        //     url: req.url,
+        //     time: new Date(startTime),
+        //     duration: Date.now() - startTime,
+        //     id: correlationContext.operation.parentId,
+        // });
+        appInsights.defaultClient.flush();
+
+        return result;
+    }, correlationContext)();
+};
 
 // module.exports = async function (context, req) {
 //     context.log('JavaScript HTTP trigger function processed a request.');
